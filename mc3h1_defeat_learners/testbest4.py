@@ -12,7 +12,7 @@ from gen_data import best4LinReg, best4RT
 def compare_os_rmse(learner1, learner2, X, Y):
 
     # compute how much of the data is training and testing
-    train_rows = math.floor(0.6* X.shape[0])
+    train_rows = int(math.floor(0.6* X.shape[0]))
     test_rows = X.shape[0] - train_rows
 
     # separate out training and testing data
