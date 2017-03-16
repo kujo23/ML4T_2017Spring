@@ -8,8 +8,8 @@ import math
 # this function should return a dataset (X and Y) that will work
 # better for linear regresstion than random trees
 def best4LinReg():
-    X = np.random.normal(size = (100, 4)) 
-    Y = np.sin(X[:,1])*np.cos(1./(0.0001+X[:,0]**2)) 
+    X = np.mgrid[-5:5:0.5,-5:5:0.5].reshape(2,-1).T
+    Y = X[:,0]*X[:,1]
     return X, Y
 
 def best4RT():

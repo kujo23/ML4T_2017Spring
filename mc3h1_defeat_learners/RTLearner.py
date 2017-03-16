@@ -10,7 +10,7 @@ import numpy as np
 class RTLearner(object):
 
     def __init__(self, verbose = False, leaf_size = 1):
-        pass # move along, these aren't the drones you're looking for
+	print "WARNING! This is a FAKE RTLearner! Replace with your own code."
 
     def addEvidence(self,dataX,dataY):
         """
