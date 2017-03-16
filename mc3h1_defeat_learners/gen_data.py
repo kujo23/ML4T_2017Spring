@@ -7,12 +7,14 @@ import math
 
 # this function should return a dataset (X and Y) that will work
 # better for linear regresstion than random trees
-def best4LinReg():
+def best4LinReg(r_seed=1489683273):
+    np.random.seed(r_seed)
     X = np.mgrid[-5:5:0.5,-5:5:0.5].reshape(2,-1).T
     Y = X[:,0]*X[:,1]
     return X, Y
 
-def best4RT():
+def best4RT(r_seed=1489683273):
+    np.random.seed(r_seed)
     X = np.random.normal(size = (50, 2)) 
     Y = 0.8 * X[:,0] + 5.0 * X[:,1] 
     return X, Y
