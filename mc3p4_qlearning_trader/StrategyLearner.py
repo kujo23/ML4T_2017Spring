@@ -104,32 +104,9 @@ class StrategyLearner(object):
             for i in range(1,days):
                 df.ix[i,:] = df.ix[i,:] *df.ix[i-1,:]
             df['momentum']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-            df['sma']= (df.ix[:,0] / df.ix[:,0].rolling(window=n,center=False).mean())-1
-            df['normal_price']= (df.ix[:,0]/df.ix[0,0])
-            df['sma_raw']=  (df.ix[:,'normal_price'].rolling(window=n,center=False).mean())
-            df['price']= df.ix[:,0]
+            df['ema']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
 
-            #ema
-            ema_multiplier = 2/(n+1.)
-            df['sma_actual']=  (df.ix[:,0].rolling(window=n,center=False).mean())
-            df.ix[n-1,'ema_raw'] =  df.ix[n-1,'sma_actual']
-            df.ix[n-1,'ema_raw_normal'] =  df.ix[n-1,'sma_raw']
-            for i in range(n,days):
-                df.ix[i,'ema_raw'] = (df.ix[i,0] - df.ix[i-1,'ema_raw'])*ema_multiplier +  df.ix[i-1,'ema_raw']
-                df.ix[i,'ema_raw_normal'] = (df.ix[i,'normal_price'] - df.ix[i-1,'ema_raw_normal'])*ema_multiplier +  df.ix[i-1,'ema_raw_normal']
-            df['ema'] = df.ix[n-1:,0]/df.ix[n-1:,'ema_raw']-1.
-            df = df.fillna(0)
-            df = df.ix[original_sd:,:]
-
-            #zscore
-            df['sma_zscore'] =  (df.sma-df.sma.mean())/df.sma.std()
-            df['ema_zscore'] =  (df.ema-df.ema.mean())/df.ema.std()
-            df['momentum_zscore'] =  (df.momentum-df.momentum.mean())/df.momentum.std()
-            df['normal_price']= (df.ix[:,'normal_price']/df.ix[0,'normal_price'])
-
-            return df[['price','normal_price','sma','ema','momentum','sma_zscore','ema_zscore','momentum_zscore']]
-
-
+            return df[['ema','momentum']]
 
         #GET PRICE
         dates = pd.date_range(sd, ed)
@@ -253,30 +230,9 @@ class StrategyLearner(object):
             for i in range(1,days):
                 df.ix[i,:] = df.ix[i,:] *df.ix[i-1,:]
             df['momentum']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-            df['sma']= (df.ix[:,0] / df.ix[:,0].rolling(window=n,center=False).mean())-1
-            df['normal_price']= (df.ix[:,0]/df.ix[0,0])
-            df['sma_raw']=  (df.ix[:,'normal_price'].rolling(window=n,center=False).mean())
-            df['price']= df.ix[:,0]
+            df['ema']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
 
-            #ema
-            ema_multiplier = 2/(n+1.)
-            df['sma_actual']=  (df.ix[:,0].rolling(window=n,center=False).mean())
-            df.ix[n-1,'ema_raw'] =  df.ix[n-1,'sma_actual']
-            df.ix[n-1,'ema_raw_normal'] =  df.ix[n-1,'sma_raw']
-            for i in range(n,days):
-                df.ix[i,'ema_raw'] = (df.ix[i,0] - df.ix[i-1,'ema_raw'])*ema_multiplier +  df.ix[i-1,'ema_raw']
-                df.ix[i,'ema_raw_normal'] = (df.ix[i,'normal_price'] - df.ix[i-1,'ema_raw_normal'])*ema_multiplier +  df.ix[i-1,'ema_raw_normal']
-            df['ema'] = df.ix[n-1:,0]/df.ix[n-1:,'ema_raw']-1.
-            df = df.fillna(0)
-            df = df.ix[original_sd:,:]
-
-            #zscore
-            df['sma_zscore'] =  (df.sma-df.sma.mean())/df.sma.std()
-            df['ema_zscore'] =  (df.ema-df.ema.mean())/df.ema.std()
-            df['momentum_zscore'] =  (df.momentum-df.momentum.mean())/df.momentum.std()
-            df['normal_price']= (df.ix[:,'normal_price']/df.ix[0,'normal_price'])
-
-            return df[['price','normal_price','sma','ema','momentum','sma_zscore','ema_zscore','momentum_zscore']]
+            return df[['ema','momentum']]
 
         # here we build a fake set of trades
         #GET INDICATOR
@@ -311,6 +267,7 @@ class StrategyLearner(object):
 
         return pd.DataFrame(data=trades.order,index=trades.index)
     
+
 
 
 if __name__=="__main__":
