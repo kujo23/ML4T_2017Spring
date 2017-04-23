@@ -24,6 +24,8 @@ class StrategyLearner(object):
         df_indicators = self.indicators(sd = sd, ed = ed,syms =[symbol],gen_plot = False,n=10,verbose=False)
         df_ema = pd.DataFrame(data=df_indicators.ema,index=df_indicators.index)
         df_momentum = pd.DataFrame(data=df_indicators.momentum,index=df_indicators.index)
+        self.thres_ema = self.discretize(df_ema)
+        self.thres_momentum = self.discretize(df_momentum)
 
         current_hold = 3 #current_hold BUY, SELL, NOTHING - 1,2,3
         state = self.get_state(trades.index[0],current_hold,df_ema,df_momentum)  #XYZ, XY are indicators
@@ -31,10 +33,6 @@ class StrategyLearner(object):
 
         hold_amount = 0
         for i in range(0,trades.shape[0]):
-            trades.ix[trades.index[i-1],'action']=action #last action
-            trades.ix[trades.index[i-1],'hold']=current_hold #last hold
-            trades.ix[trades.index[i-1],'state']=state
-
             if action==0 and hold_amount!=200:
                 hold_amount = hold_amount + 200
                 trades.ix[trades.index[i],'order'] = 200
@@ -46,7 +44,7 @@ class StrategyLearner(object):
 
             current_hold,r= self.make_trade(trades,i,current_hold,action)
             state = self.get_state(trades.index[i],current_hold,df_ema,df_momentum)
-            action = self.learner.querysetstate(state)
+            action = self.learner.query(state,r)
 
         return pd.DataFrame(data=trades.order,index=trades.index)
 
@@ -64,7 +62,7 @@ class StrategyLearner(object):
         sv = 10000):
 
         #Actions: BUY, SELL, NOTHING - 0,1,2
-        self.learner  = ql.QLearner(num_states=100000,\
+        self.learner  = ql.QLearner(num_states=1000,\
         num_actions = 3, \
         alpha = 0.2, \
         gamma = 0.9, \
@@ -96,10 +94,6 @@ class StrategyLearner(object):
             action = self.learner.querysetstate(state) #action BUY, SELL, NOTHING - 0,1,2
 
             for i in range(1,trades.shape[0]):
-                trades.ix[trades.index[i-1],'action']=action #last action
-                trades.ix[trades.index[i-1],'hold']=current_hold #last hold
-                trades.ix[trades.index[i-1],'state']=state
-
                 current_hold,r= self.make_trade(trades,i,current_hold,action)
                 state = self.get_state(trades.index[i],current_hold,df_ema,df_momentum)
                 total_reward = total_reward + r
@@ -113,7 +107,7 @@ class StrategyLearner(object):
                 break
 
     # convert the discretize values
-    def discretize(self,values,level=100):
+    def discretize(self,values,level=10):
         step_size = values.shape[0]/level
         df_sort = values.sort_values(by=values.columns[0])
         threshold = np.zeros(level)
@@ -130,7 +124,7 @@ class StrategyLearner(object):
     def get_state(self,idx,my_holding,df_ema,df_momentum):
         ema = df_ema.ix[idx,0]
         momentum = df_momentum.ix[idx,0]
-        return self.get_discrete(self.thres_ema,ema)*1000 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
+        return self.get_discrete(self.thres_ema,ema)*100 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
 
     def indicators(self,sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1),syms = ['AAPL'], n=10, gen_plot=False, verbose=False):
         original_sd = sd
