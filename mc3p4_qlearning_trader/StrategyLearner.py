@@ -90,22 +90,20 @@ class StrategyLearner(object):
         def indicators(sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1),syms = ['AAPL'], n=10, gen_plot=False, verbose=False):
             original_sd = sd
             sd = sd+timedelta(days=-3*n)
-            # Read in adjusted closing prices for given symbols, date range
             dates = pd.date_range(sd, ed)
             prices_all = ut.get_data(syms, dates)  # automatically adds SPY
             prices = prices_all[syms]  # only portfolio symbols
-            prices_SPY = prices_all['SPY']  # only SPY, for comparison later
-
-            # Get daily portfolio value
-            port_val = prices_SPY # add code here to compute daily portfolio values
             df = prices.copy()
             df[1:] = (df[1:]/df[0:-1].values)
-
             days = prices.shape[0]
             for i in range(1,days):
                 df.ix[i,:] = df.ix[i,:] *df.ix[i-1,:]
+
             df['momentum']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-            df['ema']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+
+            volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
+            volume = volume_all[syms]  # only portfolio symbols
+            df['ema']= volume.ix[:,0]
 
             return df[['ema','momentum']]
 
@@ -216,22 +214,20 @@ class StrategyLearner(object):
         def indicators(sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1),syms = ['AAPL'], n=10, gen_plot=False, verbose=False):
             original_sd = sd
             sd = sd+timedelta(days=-3*n)
-            # Read in adjusted closing prices for given symbols, date range
             dates = pd.date_range(sd, ed)
             prices_all = ut.get_data(syms, dates)  # automatically adds SPY
             prices = prices_all[syms]  # only portfolio symbols
-            prices_SPY = prices_all['SPY']  # only SPY, for comparison later
-
-            # Get daily portfolio value
-            port_val = prices_SPY # add code here to compute daily portfolio values
             df = prices.copy()
             df[1:] = (df[1:]/df[0:-1].values)
-
             days = prices.shape[0]
             for i in range(1,days):
                 df.ix[i,:] = df.ix[i,:] *df.ix[i-1,:]
+
             df['momentum']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-            df['ema']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+
+            volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
+            volume = volume_all[syms]  # only portfolio symbols
+            df['ema']= volume.ix[:,0]
 
             return df[['ema','momentum']]
 
@@ -267,7 +263,7 @@ class StrategyLearner(object):
             action = self.learner.querysetstate(state)
 
         return pd.DataFrame(data=trades.order,index=trades.index)
-
+    
 
 
 
