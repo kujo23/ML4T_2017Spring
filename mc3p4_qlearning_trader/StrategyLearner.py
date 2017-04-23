@@ -6,6 +6,7 @@ import datetime as dt
 import QLearner as ql
 import pandas as pd
 import util as ut
+import numpy as np
 from datetime import datetime, timedelta
 
 class StrategyLearner(object):
@@ -266,7 +267,7 @@ class StrategyLearner(object):
             action = self.learner.querysetstate(state)
 
         return pd.DataFrame(data=trades.order,index=trades.index)
-    
+
 
 
 
