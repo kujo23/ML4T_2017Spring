@@ -99,7 +99,8 @@ class StrategyLearner(object):
             for i in range(1,days):
                 df.ix[i,:] = df.ix[i,:] *df.ix[i-1,:]
 
-            df['momentum']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+            #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+            df['momentum']= prices.pct_change(periods=3).fillna(0)
 
             volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
             volume = volume_all[syms]  # only portfolio symbols
@@ -223,7 +224,8 @@ class StrategyLearner(object):
             for i in range(1,days):
                 df.ix[i,:] = df.ix[i,:] *df.ix[i-1,:]
 
-            df['momentum']= (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+            #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+            df['momentum']= prices.pct_change(periods=3).fillna(0)
 
             volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
             volume = volume_all[syms]  # only portfolio symbols
@@ -263,7 +265,7 @@ class StrategyLearner(object):
             action = self.learner.querysetstate(state)
 
         return pd.DataFrame(data=trades.order,index=trades.index)
-    
+
 
 
 
