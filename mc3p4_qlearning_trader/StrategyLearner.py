@@ -131,7 +131,7 @@ class StrategyLearner(object):
         ema = df_ema.ix[idx,0]
         momentum = df_momentum.ix[idx,0]
         #return self.get_discrete(self.thres_ema,ema)*100 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
-        return self.get_discrete(self.thres_ema,ema)*10 + my_holding
+        return self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
 
 
 
@@ -187,7 +187,7 @@ class StrategyLearner(object):
                 reward = 0
                 new_holding = 3
 
-        return new_holding,reward   
+        return new_holding,reward
 
 
 
