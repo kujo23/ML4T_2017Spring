@@ -44,7 +44,9 @@ class StrategyLearner(object):
 
             current_hold,r= self.make_trade(trades,i,current_hold,action)
             state = self.get_state(trades.index[i],current_hold,df_ema,df_momentum)
+            #print 'state: ',state
             action = self.learner.query(state,r)
+            #action = self.learner.querysetstate(state)
 
         return pd.DataFrame(data=trades.order,index=trades.index)
 
@@ -62,11 +64,11 @@ class StrategyLearner(object):
         sv = 10000):
 
         #Actions: BUY, SELL, NOTHING - 0,1,2
-        self.learner  = ql.QLearner(num_states=1000,\
+        self.learner  = ql.QLearner(num_states=10000,\
         num_actions = 3, \
         alpha = 0.2, \
         gamma = 0.9, \
-        rar = 0.98, \
+        rar = 0.999, \
         radr = 0.999, \
         dyna = 0, \
         verbose=False) #initialize the learner
@@ -84,8 +86,12 @@ class StrategyLearner(object):
         self.thres_ema = self.discretize(df_ema)
         self.thres_momentum = self.discretize(df_momentum)
 
+        #print 'df_momentum thres_momentum'
+        #print self.thres_momentum
+        #print ' self.thres_ema'
+        #print  self.thres_ema
         # each iteration involves one trip to the goal
-        iterations = 50
+        iterations = 30
         scores = np.zeros((iterations,1))
         for iteration in range(iterations):
             total_reward = 0
@@ -107,7 +113,7 @@ class StrategyLearner(object):
                 break
 
     # convert the discretize values
-    def discretize(self,values,level=10):
+    def discretize(self,values,level=500):
         step_size = values.shape[0]/level
         df_sort = values.sort_values(by=values.columns[0])
         threshold = np.zeros(level)
@@ -124,7 +130,10 @@ class StrategyLearner(object):
     def get_state(self,idx,my_holding,df_ema,df_momentum):
         ema = df_ema.ix[idx,0]
         momentum = df_momentum.ix[idx,0]
-        return self.get_discrete(self.thres_ema,ema)*100 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
+        #return self.get_discrete(self.thres_ema,ema)*100 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
+        return self.get_discrete(self.thres_ema,ema)*10 + my_holding
+
+
 
     def indicators(self,sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1),syms = ['AAPL'], n=10, gen_plot=False, verbose=False):
         original_sd = sd
@@ -138,12 +147,12 @@ class StrategyLearner(object):
         for i in range(1,days):
             df.ix[i,:] = df.ix[i,:] *df.ix[i-1,:]
 
-        #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-        df['momentum']= prices.pct_change(periods=3).fillna(0)
-
         volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
         volume = volume_all[syms]  # only portfolio symbols
         df['ema']= volume.ix[:,0]
+
+        #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+        df['momentum']= prices.pct_change(periods=21).fillna(0)
 
         return df[['ema','momentum']]
 
@@ -178,7 +187,7 @@ class StrategyLearner(object):
                 reward = 0
                 new_holding = 3
 
-        return new_holding,reward    
+        return new_holding,reward   
 
 
 
