@@ -64,7 +64,7 @@ class StrategyLearner(object):
         sv = 10000):
 
         #Actions: BUY, SELL, NOTHING - 0,1,2
-        self.learner  = ql.QLearner(num_states=1000000,\
+        self.learner  = ql.QLearner(num_states=100000,\
         num_actions = 3, \
         alpha = 0.2, \
         gamma = 0.9, \
@@ -93,7 +93,7 @@ class StrategyLearner(object):
         print  self.thres_ema
         '''
         # each iteration involves one trip to the goal
-        iterations = 30
+        iterations = 50
         scores = np.zeros((iterations,1))
         for iteration in range(iterations):
             total_reward = 0
@@ -115,7 +115,7 @@ class StrategyLearner(object):
                 break
 
     # convert the discretize values
-    def discretize(self,values,level=10):
+    def discretize(self,values,level=100):
         step_size = values.shape[0]/level
         df_sort = values.sort_values(by=values.columns[0])
         threshold = np.zeros(level)
@@ -133,7 +133,7 @@ class StrategyLearner(object):
         ema = df_ema.ix[idx,0]
         momentum = df_momentum.ix[idx,0]
         #return self.get_discrete(self.thres_ema,ema)*100 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
-        return self.get_discrete(self.thres_ema,ema)*10000 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
+        return self.get_discrete(self.thres_ema,ema)*1000 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
 
 
 
@@ -156,14 +156,6 @@ class StrategyLearner(object):
 
         #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
         df['momentum']= prices.pct_change(periods=5).fillna(0)
-
-        volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
-        volume = volume_all[syms]  # only portfolio symbols
-        df['ema']= volume.ix[:,0]
-        #df['ema']= prices.pct_change(periods=3).fillna(0)
-
-        #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-        df['momentum']= prices.pct_change(periods=3).fillna(0)
 
         return df[['ema','momentum']]
 
@@ -198,7 +190,7 @@ class StrategyLearner(object):
                 reward = 0
                 new_holding = 3
 
-        return new_holding,reward
+        return new_holding,reward    
 
 
 
