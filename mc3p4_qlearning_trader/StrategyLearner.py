@@ -64,7 +64,7 @@ class StrategyLearner(object):
         sv = 10000):
 
         #Actions: BUY, SELL, NOTHING - 0,1,2
-        self.learner  = ql.QLearner(num_states=10000,\
+        self.learner  = ql.QLearner(num_states=1000000,\
         num_actions = 3, \
         alpha = 0.2, \
         gamma = 0.9, \
@@ -86,10 +86,12 @@ class StrategyLearner(object):
         self.thres_ema = self.discretize(df_ema)
         self.thres_momentum = self.discretize(df_momentum)
 
-        #print 'df_momentum thres_momentum'
-        #print self.thres_momentum
-        #print ' self.thres_ema'
-        #print  self.thres_ema
+        '''
+        print 'df_momentum thres_momentum'
+        print self.thres_momentum
+        print ' self.thres_ema'
+        print  self.thres_ema
+        '''
         # each iteration involves one trip to the goal
         iterations = 30
         scores = np.zeros((iterations,1))
@@ -113,7 +115,7 @@ class StrategyLearner(object):
                 break
 
     # convert the discretize values
-    def discretize(self,values,level=500):
+    def discretize(self,values,level=10):
         step_size = values.shape[0]/level
         df_sort = values.sort_values(by=values.columns[0])
         threshold = np.zeros(level)
@@ -131,7 +133,7 @@ class StrategyLearner(object):
         ema = df_ema.ix[idx,0]
         momentum = df_momentum.ix[idx,0]
         #return self.get_discrete(self.thres_ema,ema)*100 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
-        return self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
+        return self.get_discrete(self.thres_ema,ema)*10000 + self.get_discrete(self.thres_momentum,momentum)*10 + my_holding
 
 
 
@@ -150,9 +152,18 @@ class StrategyLearner(object):
         volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
         volume = volume_all[syms]  # only portfolio symbols
         df['ema']= volume.ix[:,0]
+        df['ema']= prices.rolling(window=14,center=False).std().fillna(0)
 
         #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-        df['momentum']= prices.pct_change(periods=21).fillna(0)
+        df['momentum']= prices.pct_change(periods=5).fillna(0)
+
+        volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
+        volume = volume_all[syms]  # only portfolio symbols
+        df['ema']= volume.ix[:,0]
+        #df['ema']= prices.pct_change(periods=3).fillna(0)
+
+        #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
+        df['momentum']= prices.pct_change(periods=3).fillna(0)
 
         return df[['ema','momentum']]
 
@@ -188,7 +199,6 @@ class StrategyLearner(object):
                 new_holding = 3
 
         return new_holding,reward
-
 
 
 
