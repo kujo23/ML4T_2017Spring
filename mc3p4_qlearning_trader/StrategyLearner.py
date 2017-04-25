@@ -161,12 +161,12 @@ class StrategyLearner(object):
         #volume = volume_all[syms]  # only portfolio symbols
         #df['ema']= volume.ix[:,0]
         #df['ema']= prices.rolling(window=14,center=False).std().fillna(0)
-        df['ema']= pd.rolling_std(prices,window=14).fillna(0)
+        df['ema']= pd.rolling_std(prices,window=7).fillna(0)
 
         #df['momentum'] = (df.ix[2*n:,0]/df.ix[0:-2*n:,0].values)-1.
-        df['momentum']= prices.pct_change(periods=3).fillna(0)
-        df['change']= prices.pct_change(periods=7).fillna(0)
-        df['change2']= prices.pct_change(periods=14).fillna(0)
+        df['momentum']= prices.pct_change(periods=2).fillna(0)
+        df['change']= prices.pct_change(periods=4).fillna(0)
+        df['change2']= prices.pct_change(periods=6).fillna(0)
 
 
         return df[['ema','momentum','change','change2']]
@@ -202,7 +202,7 @@ class StrategyLearner(object):
                 reward = 0
                 new_holding = 3
 
-        return new_holding,reward  
+        return new_holding,reward
 
 
 
